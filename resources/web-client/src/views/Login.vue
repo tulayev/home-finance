@@ -3,6 +3,11 @@
     <div class="flex items-center justify-center min-h-screen bg-gray-100">
         <div class="px-8 py-6 mt-4 text-left bg-white shadow-lg">
             <h3 class="text-2xl font-bold text-center">Login to your account</h3>
+
+            <ValidationErrors
+                :errors="error"
+            />
+
             <form @submit.prevent="submit">
                 <div class="mt-4">
                     <div>
@@ -44,30 +49,37 @@
 import {ref} from 'vue'
 import axios from 'axios'
 import {useRouter} from 'vue-router'
+import ValidationErrors from '../components/ValidationErrors'
 
 export default {
     name: 'Login',
-
+    components: {ValidationErrors},
     setup() {
         const email = ref('')
         const password = ref('')
         const router = useRouter()
+        const error = ref(null)
 
         const submit = async () => {
-            const response = await axios.post('/login', {
-                email: email.value,
-                password: password.value
-            })
+            try {
+                const response = await axios.post('/login', {
+                    email: email.value,
+                    password: password.value
+                })
 
-            localStorage.setItem('token', response.data.token)
-            axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('token')}`
+                localStorage.setItem('token', response.data.token)
+                axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('token')}`
 
-            await router.push({name: 'Home'})
+                await router.push({name: 'Home'})
+            } catch (e) {
+                error.value = e.response.data.error
+            }
         }
 
         return {
             email,
             password,
+            error,
             submit
         }
 

@@ -1,5 +1,9 @@
 <template>
 
+    <ValidationErrors
+        :errors="error"
+    />
+
     <form
         class="w-full max-w-lg mx-auto"
         @submit.prevent="submit"
@@ -29,20 +33,43 @@
 </template>
 
 <script>
-import {ref} from 'vue'
+import {onMounted, ref} from 'vue'
+import axios from 'axios'
+import {useRoute, useRouter} from 'vue-router'
+import ValidationErrors from '../../components/ValidationErrors'
 
 export default {
     name: 'Edit',
+    components: {ValidationErrors},
 
     setup() {
         const name = ref('')
+        const {params} = useRoute()
+        const router = useRouter()
+        const error = ref(null)
+
+        onMounted(async () => {
+            const response = await axios.get(`/categories/${params.id}`)
+            const category = response.data
+            name.value = category.name
+        })
 
         const submit = async () => {
-            console.log(name.value)
+            try {
+                const response = await axios.put(`/categories/${params.id}`, {
+                    name: name.value
+                })
+                name.value = ''
+                await router.push({name: 'Category'})
+            } catch (e) {
+                error.value = e.response.data.errors
+            }
         }
+
 
         return {
             name,
+            error,
             submit
         }
     }

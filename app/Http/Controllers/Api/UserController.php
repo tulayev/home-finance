@@ -24,13 +24,16 @@ class UserController extends Controller
      */
     public function updateInfo(Request $request): JsonResponse
     {
-        $this->validate($request, [
-            'email' => 'email|unique:users',
-        ]);
-
         $user = Auth::user();
 
-        $user->update($request->only('first_name', 'last_name', 'email', 'image'));
+        if ($user->email == $request['email']) {
+            $user->update($request->only('first_name', 'last_name', 'image'));
+        } else {
+            $this->validate($request, [
+                'email' => 'email|unique:users',
+            ]);
+            $user->update($request->only('first_name', 'last_name', 'email', 'image'));
+        }
 
         return response()->json([
             'user' => $user,

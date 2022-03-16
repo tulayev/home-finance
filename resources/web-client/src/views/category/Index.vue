@@ -25,16 +25,20 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="border-b">
+                            <tr
+                                class="border-b"
+                                v-for="category in categories"
+                                :key="category.id"
+                            >
                                 <td class="text-gray-900 px-6 py-4 whitespace-nowrap">
-                                    1
+                                    {{category.id}}
                                 </td>
                                 <td class="text-gray-900 px-6 py-4 whitespace-nowrap">
-                                    Тест
+                                    {{category.name}}
                                 </td>
                                 <td class="text-gray-900 px-6 py-4 whitespace-nowrap">
                                     <router-link
-                                        :to="{name: 'Category.Edit', params: {id: 1}}"
+                                        :to="{name: 'Category.Edit', params: {id: category.id}}"
                                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold mx-2 py-2 px-4 rounded"
                                     >
                                         Изменить
@@ -42,6 +46,7 @@
                                     <a
                                         href="javascript:void(0)"
                                         class="bg-red-500 hover:bg-blue-700 text-white font-bold mx-2 py-2 px-4 rounded"
+                                        @click="remove(category.id)"
                                     >
                                         Удалить
                                     </a>
@@ -56,7 +61,35 @@
 </template>
 
 <script>
+import {onMounted, ref} from 'vue'
+import axios from 'axios'
+
 export default {
-    name: 'Index'
+    name: 'Index',
+
+    setup() {
+        const categories = ref([])
+
+        onMounted(async () => {
+            try {
+                const response = await axios.get('/categories')
+                categories.value = response.data
+            } catch (e) {
+                console.log(e.response.data)
+            }
+        })
+
+        const remove = async (id) => {
+            if (confirm('Вы уверены, что хотите удалить эту категорию?')) {
+                await axios.delete(`/categories/${id}`)
+                categories.value = categories.value.filter(c => c.id !== id)
+            }
+        }
+
+        return {
+            categories,
+            remove
+        }
+    }
 }
 </script>

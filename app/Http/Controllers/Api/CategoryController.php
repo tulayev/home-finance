@@ -18,6 +18,11 @@ class CategoryController extends Controller
         return Category::with('records')->get();
     }
 
+    public function show($id)
+    {
+        return Category::findOrFail($id);
+    }
+
     /**
      * @throws \Illuminate\Validation\ValidationException
      */

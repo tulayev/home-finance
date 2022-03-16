@@ -1,5 +1,16 @@
 <template>
 
+    <ValidationErrors
+        :errors="error"
+    />
+
+    <p
+        class="text-green-600 text-lg"
+        v-if="res"
+    >
+        Добавлено
+    </p>
+
     <form
         class="w-full max-w-lg mx-auto"
         @submit.prevent="submit"
@@ -30,19 +41,32 @@
 
 <script>
 import {ref} from 'vue'
+import axios from 'axios'
+import ValidationErrors from '../../components/ValidationErrors'
 
 export default {
     name: 'Create',
-
+    components: {ValidationErrors},
     setup() {
         const name = ref('')
+        const error = ref(null)
+        const res = ref(null)
 
         const submit = async () => {
-            console.log(name.value)
+            try {
+                res.value = (await axios.post('/categories', {
+                    name: name.value
+                })).data
+                name.value = ''
+            } catch (e) {
+                error.value = e.response.data.errors
+            }
         }
 
         return {
             name,
+            error,
+            res,
             submit
         }
     }

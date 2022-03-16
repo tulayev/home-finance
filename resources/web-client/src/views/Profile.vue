@@ -1,5 +1,9 @@
 <template>
-    <h1>Profile</h1>
+    <h1 class="my-4 text-2xl">Profile</h1>
+
+    <ValidationErrors
+        :errors="errors"
+    />
 
     <div
         class="flex justify-between"
@@ -108,10 +112,11 @@
 import axios from 'axios'
 import {onMounted, ref} from 'vue'
 import UploadHandler from '../components/UploadHandler'
-import router from "@/router";
+import router from '@/router'
+import ValidationErrors from '../components/ValidationErrors'
 export default {
     name: 'Profile',
-    components: {UploadHandler},
+    components: {ValidationErrors, UploadHandler},
 
     setup() {
         const user = ref(null)
@@ -121,6 +126,7 @@ export default {
         const pwd = ref('')
         const pwdConfirm = ref('')
         const image = ref('')
+        const errors = ref(null)
 
         onMounted(async () => {
             const response = await axios.get('/user')
@@ -134,14 +140,18 @@ export default {
         })
 
         const submitInfo = async () => {
-            await axios.put('/user/info', {
-                first_name: fName.value,
-                last_name: lName.value,
-                email: email.value,
-                image: image.value,
-            })
+            try {
+                await axios.put('/user/info', {
+                    first_name: fName.value,
+                    last_name: lName.value,
+                    email: email.value,
+                    image: image.value,
+                })
 
-            router.go(0)
+                router.go(0)
+            } catch (e) {
+               errors.value =  e.response.data.errors
+            }
         }
 
         const submitPassword = async () => {
@@ -161,6 +171,7 @@ export default {
             pwd,
             pwdConfirm,
             image,
+            errors,
             submitInfo,
             submitPassword
         }

@@ -37,28 +37,32 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="border-b">
+                            <tr
+                                class="border-b"
+                                v-for="record in records"
+                                :key="record.id"
+                            >
                                 <td class="text-gray-900 px-6 py-4 whitespace-nowrap">
-                                    Доход
+                                    {{record.type === 1 ? 'Доход' : 'Расход'}}
                                 </td>
                                 <td class="text-gray-900 px-6 py-4 whitespace-nowrap">
-                                    Название категории
+                                    {{record.category.name}}
                                 </td>
                                 <td class="text-gray-900 px-6 py-4 whitespace-nowrap">
-                                    12.12.2021
+                                    {{record.created_at}}
                                 </td>
                                 <td class="text-gray-900 px-6 py-4 whitespace-nowrap">
-                                    1 000 000
+                                    {{record.amount}}
                                 </td>
                                 <td class="text-gray-900 px-6 py-4 whitespace-nowrap">
-                                    1 000 000
+                                    {{record.total}}
                                 </td>
                                 <td class="text-gray-900 px-6 py-4 whitespace-nowrap">
-                                    Комментарий какой-то
+                                    {{record.comment}}
                                 </td>
                                 <td class="text-gray-900 px-6 py-4 whitespace-nowrap">
                                     <router-link
-                                        :to="{name: 'Record.Edit', params: {id: 1}}"
+                                        :to="{name: 'Record.Edit', params: {id: record.id}}"
                                         class="bg-blue-500 hover:bg-blue-700 text-white font-bold mx-2 py-2 px-4 rounded"
                                     >
                                         Изменить
@@ -66,6 +70,7 @@
                                     <a
                                         href="javascript:void(0)"
                                         class="bg-red-500 hover:bg-blue-700 text-white font-bold mx-2 py-2 px-4 rounded"
+                                        @click="remove(record.id)"
                                     >
                                         Удалить
                                     </a>
@@ -80,8 +85,32 @@
 </template>
 
 <script>
+import {ref, onMounted} from 'vue'
+import axios from 'axios'
+
 export default {
-    name: 'Index'
+    name: 'Index',
+
+    setup() {
+        const records = ref([])
+
+        onMounted(async () => {
+            const response = await axios.get('/records')
+            records.value = response.data
+        })
+
+        const remove = async (id) => {
+            if (confirm('Вы уверены, что хотите удалить эту запись?')) {
+                await axios.delete(`/records/${id}`)
+                records.value = records.value.filter(r => r.id !== id)
+            }
+        }
+
+        return {
+            records,
+            remove
+        }
+    }
 }
 </script>
 

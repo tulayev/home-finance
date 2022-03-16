@@ -19,7 +19,8 @@ class RecordController extends Controller
 
     public function index()
     {
-        return Record::all();
+        return Record::with('category')
+            ->get();
     }
 
     /**

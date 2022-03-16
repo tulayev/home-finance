@@ -28,9 +28,9 @@ class User extends Authenticatable
 
     protected $appends = ['image_path'];
 
-    public function getImagePathAttribute($value): string
+    public function getImagePathAttribute(): string
     {
-        return asset('storage/images/' .  $value);
+        return asset('storage/images/' .  $this->image);
     }
 
     /**

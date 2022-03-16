@@ -37,9 +37,13 @@
                         class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                         v-model="categoryId"
                     >
-                        <option value="1">New Mexico</option>
-                        <option value="2">Missouri</option>
-                        <option value="3">Texas</option>
+                        <option
+                            v-for="category in categories"
+                            :key="category.id"
+                            :value="category.id"
+                        >
+                            {{category.name}}
+                        </option>
                     </select>
                 </div>
             </div>
@@ -83,21 +87,43 @@
 </template>
 
 <script>
-import {ref} from 'vue'
+import {onMounted, ref} from 'vue'
+import axios from 'axios'
+import {useRouter} from 'vue-router'
 
 export default {
     name: 'Create',
 
     setup() {
+        const router = useRouter()
         const amount = ref(0)
         const comment = ref('')
         const type = ref(1)
+        const categories = ref([])
         const categoryId = ref(0)
         const createdAt = ref('')
 
         const submit = async () => {
             createdAt.value = document.getElementById('datePicker').value
+            try {
+                await axios.post('/records', {
+                    amount: amount.value,
+                    comment: comment.value,
+                    type: type.value,
+                    category_id: categoryId.value,
+                    createdAt: createdAt.value
+                })
+
+                await router.push({name: 'Record'})
+            } catch (e) {
+                console.log(e.response.data)
+            }
         }
+
+        onMounted(async () => {
+            const response = await axios.get('/categories')
+            categories.value = response.data
+        })
 
         return {
             amount,
@@ -105,6 +131,7 @@ export default {
             type,
             categoryId,
             createdAt,
+            categories,
             submit
         }
     }
