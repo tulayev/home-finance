@@ -41,10 +41,11 @@
 <script>
 import Sidebar from '../components/Sidebar'
 import Navbar from '../components/Navbar'
-import {onBeforeMount, ref} from 'vue'
+import {onMounted, ref} from 'vue'
 import {useRouter} from 'vue-router'
-import axios from 'axios'
 import Spinner from '../components/Spinner'
+import {useStore} from 'vuex'
+import axios from 'axios'
 
 export default {
     name: 'Home',
@@ -52,8 +53,9 @@ export default {
 
     setup() {
         const router = useRouter()
+        const store = useStore()
         const user = ref(null)
-        onBeforeMount (async () => {
+        onMounted(async () => {
             try {
                 const response = await axios.get('/user')
                 user.value = response.data.user

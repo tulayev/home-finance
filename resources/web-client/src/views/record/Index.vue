@@ -43,7 +43,7 @@
                                 :key="record.id"
                             >
                                 <td class="text-gray-900 px-6 py-4 whitespace-nowrap">
-                                    {{record.type === 1 ? 'Доход' : 'Расход'}}
+                                    {{type[record.type]}}
                                 </td>
                                 <td class="text-gray-900 px-6 py-4 whitespace-nowrap">
                                     {{record.category.name}}
@@ -52,10 +52,10 @@
                                     {{record.created_at}}
                                 </td>
                                 <td class="text-gray-900 px-6 py-4 whitespace-nowrap">
-                                    {{record.amount}}
+                                    {{numberWithSpaces(Number(record.amount))}}
                                 </td>
                                 <td class="text-gray-900 px-6 py-4 whitespace-nowrap">
-                                    {{record.total}}
+                                    {{numberWithSpaces(Number(record.total))}}
                                 </td>
                                 <td class="text-gray-900 px-6 py-4 whitespace-nowrap">
                                     {{record.comment}}
@@ -93,11 +93,21 @@ export default {
 
     setup() {
         const records = ref([])
+        const type = ref({
+            '1': 'Доход',
+            '2': 'Расход'
+        })
 
         onMounted(async () => {
             const response = await axios.get('/records')
             records.value = response.data
         })
+
+        const numberWithSpaces = (x) => {
+            let parts = x.toString().split('.')
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+            return parts.join('.')
+        }
 
         const remove = async (id) => {
             if (confirm('Вы уверены, что хотите удалить эту запись?')) {
@@ -108,6 +118,8 @@ export default {
 
         return {
             records,
+            type,
+            numberWithSpaces,
             remove
         }
     }

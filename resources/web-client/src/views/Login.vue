@@ -49,6 +49,7 @@
 import {ref} from 'vue'
 import axios from 'axios'
 import {useRouter} from 'vue-router'
+import {useStore} from 'vuex'
 import ValidationErrors from '../components/ValidationErrors'
 
 export default {
@@ -59,20 +60,23 @@ export default {
         const password = ref('')
         const router = useRouter()
         const error = ref(null)
+        const store = useStore()
 
         const submit = async () => {
             try {
-                const response = await axios.post('/login', {
+                await store.dispatch('login',  {
                     email: email.value,
                     password: password.value
                 })
 
-                localStorage.setItem('token', response.data.token)
+                const token = ref(store.getters.token)
+
+                localStorage.setItem('token', token.value)
                 axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('token')}`
 
                 await router.push({name: 'Home'})
             } catch (e) {
-                error.value = e.response.data.error
+                console.log(e)
             }
         }
 
@@ -82,7 +86,6 @@ export default {
             error,
             submit
         }
-
     }
 }
 </script>
